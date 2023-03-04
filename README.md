@@ -106,13 +106,92 @@ Proves i exercicis a fer i entregar
 1. Reprodueix l'exemple fent servir diferents freqüències per la sinusoide. Al menys considera $f_x = 4$ kHz, a banda d'una
     freqüència pròpia en el marge audible. Comenta els resultats.
 
+```python
+# 1. declaramos todas las variables. Son las mismas que antes pero cambiando algunos valores
+
+T= 2.5
+fm=8000
+fx=4000
+A=4
+pi=np.pi
+L = int(fm * T)
+Tm=1/fm
+t=Tm*np.arange(L)
+x = A * np.cos(2 * pi * fx * t)
+sf.write('so_exemple1.wav', x, fm)
+
+# 2. representamos graficamente
+Tx=1/fx
+Ls=int(fm*5*Tx)
+plt.figure(0)
+plt.plot(t[0:Ls], x[0:Ls])
+plt.xlabel('t en segons')
+plt.title('5 periodes de la sinusoide')
+plt.show() 
+
+# 3. escuchamos
+import sounddevice as sd
+sd.play(x, fm)
+
+# 4. calculamos los parametros de la transformada
+from numpy.fft import fft
+N=5000
+X=fft(x[0 : Ls], N)
+
+# 5. representamos modulo y fase graficamente
+k=np.arange(N)
+plt.figure(1)
+plt.subplot(211)
+plt.plot(k,abs(X))
+plt.title(f'Transformada del senyal de Ls={Ls} mostres amb DFT de N={N}')
+plt.ylabel('|X[k]|')
+plt.subplot(212)
+plt.plot(k,np.unwrap(np.angle(X)))desenroscada
+plt.xlabel('Index k')
+plt.ylabel('$\phi_x[k]$')
+plt.show()
+```
+
 2. Modifica el programa per considerar com a senyal a analitzar el senyal del fitxer wav que has creat 
     (`x_r, fm = sf.read('nom_fitxer.wav')`).
 
     - Insereix a continuació una gràfica que mostri 5 períodes del senyal i la seva transformada.
+  
+```python
+# 1. leemos el fichero y lo sacamos junto a su fm
 
-    - Explica el resultat del apartat anterior.
+x, fm = sf.read('nom_fitxer.wav')
 
+# 2. representamos graficamente
+Tx=1/fm
+Ls=int(fm*5*Tx)
+plt.figure(0)
+plt.plot(t[0:Ls], x[0:Ls])
+plt.xlabel('t en segons')
+plt.title('5 periodes de la sinusoide')
+plt.show() 
+
+# 4. calculamos los parametros de la transformada
+from numpy.fft import fft
+N=5000
+X=fft(x[0 : Ls], N)
+
+# 5. representamos modulo y fase graficamente
+k=np.arange(N)
+plt.figure(1)
+plt.subplot(211)
+plt.plot(k,abs(X))
+plt.title(f'Transformada del senyal de Ls={Ls} mostres amb DFT de N={N}')
+plt.ylabel('|X[k]|')
+plt.subplot(212)
+plt.plot(k,np.unwrap(np.angle(X)))desenroscada
+plt.xlabel('Index k')
+plt.ylabel('$\phi_x[k]$')
+plt.show()
+```
+
+- Explica el resultat del apartat anterior.
+  
 3. Modifica el programa per representar el mòdul de la Transformada de Fourier en dB i l'eix d'abscisses en el marge de
     $0$ a $f_m/2$ en Hz.
 
@@ -131,6 +210,52 @@ Proves i exercicis a fer i entregar
 >
 > $f_k = \frac{k}{N} f_m$
 
+```python
+# 1. declaramos todas las variables. Son las mismas que antes pero cambiando el archivo de audio
+
+T= 2.5
+fm=8000
+fx=440
+A=4
+pi=np.pi
+L = int(fm * T)
+Tm=1/fm
+t=Tm*np.arange(L)
+x = A * np.cos(2 * pi * fx * t)
+sf.write('nom_fitxer.wav', x, fm)
+
+# 2. representamos graficamente
+Tx=1/fx
+Ls=int(fm*5*Tx)
+plt.figure(0)
+plt.plot(t[0:Ls], x[0:Ls])
+plt.xlabel('t en segons')
+plt.title('5 periodes de la sinusoide')
+plt.show() 
+
+# 4. calculamos los parametros de la transformada
+from numpy.fft import fft
+N=5000
+X=fft(x[0 : Ls], N)
+XdB = 20*log(abs(X)/max(abs(X)))
+
+# 5. representamos modulo y fase graficamente
+k=np.arange(fm/2) # aquí es donde cambiamos el eje de abcisas
+plt.figure(1)
+plt.subplot(211)
+plt.plot(k,abs(XdB))
+plt.title(f'Transformada del senyal de Ls={Ls} mostres amb DFT de N={N}')
+plt.ylabel('|X[k]|')
+plt.subplot(212)
+plt.plot(k,np.unwrap(np.angle(X)))desenroscada
+plt.xlabel('dB') # aquí es donde cambiamos la etiqueta del eje
+plt.ylabel('$\phi_x[k]$')
+plt.show()
+
+# la amplitud la podemos saber calculando el maximo de la sinusoide que nos dará la amplitud de pico a pico y luego lo dividiendo entre 2
+amplitud = (max(XdB))/2
+```
+
 4. Tria un fitxer d'àudio en format wav i mono (el pots aconseguir si en tens amb altres formats amb el programa Audacity). 
     Llegeix el fitxer d'àudio i comprova:
 
@@ -140,6 +265,40 @@ Proves i exercicis a fer i entregar
     - Representa la seva transformada en dB en funció de la freqüència, en el marge $f_m\le f\le f_m/2$.
     - Quines son les freqüències més importants del segment triat?
 
+```python
+# 1. leemos el fichero y lo sacamos junto a su fm
+
+x, fm = sf.read('nom_fitxer.wav')
+# fm = frecuencia de mostratge
+num_muestras = len(x)/ fm # Nombre de mostres de senyal
+
+# 2. representamos graficamente
+Ls=int(0.025) # aquí es donde decidimos la longitud del eje X
+plt.figure(0)
+plt.plot(t[0:Ls], x[0:Ls])
+plt.xlabel('t en segons')
+plt.title('evolución temporal') # título
+plt.show() 
+
+# 4. calculamos los parametros de la transformada
+from numpy.fft import fft
+N=5000
+X=fft(x[0 : Ls], N)
+XdB = 20*log(abs(X)/max(abs(X))) # pasamos la transformada a dB
+
+# 5. representamos modulo y fase graficamente
+k=np.arange(fm,fm/2) # aqui definimos el margen de la transformada
+plt.figure(1)
+plt.subplot(211)
+plt.plot(k,abs(XdB))
+plt.title(f'Transformada del senyal de Ls={Ls} mostres amb DFT de N={N}')
+plt.ylabel('|X[k]|')
+plt.subplot(212)
+plt.plot(k,np.unwrap(np.angle(X)))desenroscada
+plt.xlabel('Index k')
+plt.ylabel('$\phi_x[k]$')
+plt.show()
+```
 
 Entrega
 -------
